@@ -1,0 +1,143 @@
+---
+title: "Assginment 1: Data types and R basics (50 poitns)"
+subtitle: "Answer keys"
+author: "Fang Fang"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+output: 
+  html_document: 
+    keep_md: no 
+
+
+---
+```{r include=F}
+library(tidyverse)
+adult_income <- read_csv("data/adult.csv")
+```
+
+
+## Load the dataset
+To answer question 1-5, please load ‘adult.csv’ the into R. Note: data downloaded from [here](https://archive.ics.uci.edu/ml/datasets/Adult)
+
+```{r message=F}
+library(tidyverse)
+adult_income <- read_csv("data/adult.csv")
+```
+# Question 1. (5 points)
+For this adult_income dataset, how many variables are characters? 
+
+Answer: 9 columns
+
+# Question 2. (5 points)
+
+The code chunk below will generate you a bar plot to display how many records we have for each education
+group (use the column called education).
+However, the factors are not ordered properly. Please reorder “education”, (Preschool < 1st-4th < 5th-6th
+< 7th-8th < 9th < 10th < 11th < 12th < HS-grad < Prof-school < Assoc-acdm < Assoc-voc < Some-college
+< Bachelors < Masters < Doctorate.) and then generate an updated barplot. Please provide both your
+script and barplot.
+
+Answer: 
+```{r}
+barplot(table(adult_income$education), main="Barplot created by Fang")
+adult_income$education<- factor(adult_income$education,levels =
+c("Preschool" , "1st-4th", "5th-6th", "7th-8th", "9th","10th", "11th","12th", "HS-grad", "Prof-school",
+  "Assoc-acdm", "Assoc-voc",  "Some-college",
+  "Bachelors", "Masters", "Doctorate"))
+barplot(table(adult_income$education), main="Barplot created by Fang")
+```
+
+# Question 3 (5 points)
+Under the column called `workclass`, there are some missing values which are labeled as `?`. The table
+function below summarizes the frequency for each work class and you should get 1836 records with `?` as
+work class. Try to replace all the `?` as `missing value` in this dataset, and execute the table function again
+to provide an updated frequency summary table for this workclass column.
+```{r message=F}
+library(tidyverse)
+table(adult_income$workclass)
+adult_income$workclass <- fct_recode(adult_income$workclass, "missing"="?")
+table(adult_income$workclass)
+```
+
+# Question 4. (5 points)
+How many of people are under 20? You need to use the column called `age` to subset the dataset. 
+
+Answer: 1657 are under 20. 
+```{r}
+sum(adult_income$age<20)
+```
+
+# Question 5. (10 points)
+What is the average working hour per week (based on column called `hours.per.week` column) for people
+who divorced (based on column called `marital.status`)?
+
+Hint: To answer the questions you need 1) generate a new subset based on column called `marital.status`,
+which only includes records showing people who divorced. 2) use the `mean` function to calculate the average
+working hour per week. Check out the sample script below, where we simply calculate the average working
+hour per week for the entire dataset.
+
+Answer: 41.25 hours per week
+```{r}
+divorced <- adult_income[adult_income$marital.status=="Divorced",]
+mean(divorced$hours.per.week)
+
+```
+
+
+
+# Question 6 (10 points)
+Load the dataset called "austin_weather.csv" from Compass. This dataset includes historical daily temperature, precipitation, humidity, and windspeed of Austin, Texas from 2013 to 2017. See more details of the dataset, click [here](https://www.kaggle.com/grubenm/austin-weather?select=austin_weather.csv). 
+
+We are interested in calculating the average wind speed (Use the column called `WindAvgMPH`) when `TempAvgF` is above 75 F. Check out the script below. Why the script does not work? How to fix it? So what is the average wind speed when temperature is above 75 F? 
+
+
+```{r eval=F}
+austin <- read_csv("data/austin_weather.csv")
+austin_above75 <- austin$TempAvgF>75 # To extract a subset which has average temperature above 75. 
+mean(austin_above75$WindAvgMPH)  # calculate the average WindAvgMPH for the subset
+```
+
+Answers:To subset a dataframe, we need to specify the condition for both rows and columns. Also we need to convert windavgmph as numbers when calculating average. In addition, we need to exclude NAs. The average WindAvgMPH is 5.108
+
+```{r message=F}
+austin <- read_csv("data/austin_weather.csv")
+austin_above75 <- austin[austin$TempAvgF>75,]  
+mean(as.numeric(austin_above75$WindAvgMPH), na.rm=T) 
+```
+
+
+# Question 7 (10 points)
+Examine this weather dataset in Austin. Since the records for 2013 and 2017 are incomplete, you can just focus on data collected in 2014-2016.
+
+According to National weather service heat index [*chart*](https://www.weather.gov/safety/heat-index#:~:text=The%20Heat%20Index%20is%20a,with%20the%20actual%20air%20temperature.&text=As%20an%20example%2C%20if%20the,without%20numbers%20indicates%20extreme%20danger.), air temperature above 80 F will be labled as "caution". For simplicity, let's ignore humidity for this question. 
+
+During these 3 years (2014-2016), which year has the most days of Average temperature above 80F? Hint:
+you can use the column called `TempAvgF` to answer the question. Use `table` function to summarize the
+counts for days of average temperature above 80F.
+
+Put your commands below to answer the question.
+ 
+Answer: 2016 has the most days (206) with TempAvgF above 80F. 
+
+```{r message=F}
+library(lubridate)
+austin$year <- year(austin$Date)
+austin$caution <- austin$TempHighF>80
+
+year2014 <- austin[austin$year=="2014",]
+year2015 <- austin[austin$year=="2015",]
+year2016 <- austin[austin$year=="2016",]
+
+table(year2014$caution)
+
+
+table(year2015$caution)
+
+table(year2016$caution)
+```
+
+
+
